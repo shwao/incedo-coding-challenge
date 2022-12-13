@@ -1,5 +1,6 @@
 node_modules
 development.env
+production.env
 /dist
 /.nyc_output
 /.vscode
