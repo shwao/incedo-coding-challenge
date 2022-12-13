@@ -26,12 +26,12 @@ test.afterEach((t) =>
 	t.context.server.close();
 });
 
-test("GET /artists/search/:artistName/csv/write-file should return error because of missing artistName", async (t) =>
+test("POST /artists/search/:artistName/csv/write-file should return error because of missing artistName", async (t) =>
 {
 	const { server } = t.context;
 
 	const response = await server.inject({
-		method: "GET",
+		method: "POST",
 		url: "/artists/search//csv/write-file",
 	});
 
@@ -40,12 +40,12 @@ test("GET /artists/search/:artistName/csv/write-file should return error because
 	t.is(response.json().message, "params/artistName must NOT have fewer than 1 characters");
 });
 
-test("GET /artists/search/:artistName/csv/write-file should return error because of missing csvFileName", async (t) =>
+test("POST /artists/search/:artistName/csv/write-file should return error because of missing csvFileName", async (t) =>
 {
 	const { server } = t.context;
 
 	let response = await server.inject({
-		method: "GET",
+		method: "POST",
 		url: "/artists/search/test/csv/write-file",
 	});
 
@@ -54,7 +54,7 @@ test("GET /artists/search/:artistName/csv/write-file should return error because
 	t.is(response.json().message, "querystring must have required property 'csvFileName'");
 
 	response = await server.inject({
-		method: "GET",
+		method: "POST",
 		url: "/artists/search/test/csv/write-file",
 		query: {
 			csvFileName: "",
@@ -66,12 +66,12 @@ test("GET /artists/search/:artistName/csv/write-file should return error because
 	t.is(response.json().message, "querystring/csvFileName must NOT have fewer than 1 characters");
 });
 
-test("GET /artists/search/:artistName/csv/write-file should return error because of invalid randomFallbackAmount", async (t) =>
+test("POST /artists/search/:artistName/csv/write-file should return error because of invalid randomFallbackAmount", async (t) =>
 {
 	const { server } = t.context;
 
 	let response = await server.inject({
-		method: "GET",
+		method: "POST",
 		url: "/artists/search/test/csv/write-file",
 		query: {
 			csvFileName: "test",
@@ -84,7 +84,7 @@ test("GET /artists/search/:artistName/csv/write-file should return error because
 	t.is(response.json().message, "querystring/randomFallbackAmount must be number");
 
 	response = await server.inject({
-		method: "GET",
+		method: "POST",
 		url: "/artists/search/test/csv/write-file",
 		query: {
 			csvFileName: "test",
@@ -97,7 +97,7 @@ test("GET /artists/search/:artistName/csv/write-file should return error because
 	t.is(response.json().message, "querystring/randomFallbackAmount must be >= 1");
 
 	response = await server.inject({
-		method: "GET",
+		method: "POST",
 		url: "/artists/search/test/csv/write-file",
 		query: {
 			csvFileName: "test",
@@ -110,12 +110,12 @@ test("GET /artists/search/:artistName/csv/write-file should return error because
 	t.is(response.json().message, "querystring/randomFallbackAmount must be <= 3");
 });
 
-test("GET /artists/search/:artistName/csv/write-file should return generic error", async (t) =>
+test("POST /artists/search/:artistName/csv/write-file should return generic error", async (t) =>
 {
 	const { server } = t.context;
 
 	const response = await server.inject({
-		method: "GET",
+		method: "POST",
 		url: "/artists/search/test/csv/write-file",
 		query: {
 			csvFileName: "test",
@@ -127,7 +127,7 @@ test("GET /artists/search/:artistName/csv/write-file should return generic error
 	t.is(response.json().message, "Error while searching for artists");
 });
 
-test.serial("GET /artists/search/:artistName/csv/write-file should write file", async (t) =>
+test.serial("POST /artists/search/:artistName/csv/write-file should write file", async (t) =>
 {
 	const { server } = t.context;
 
@@ -138,7 +138,7 @@ test.serial("GET /artists/search/:artistName/csv/write-file should write file", 
 	process.env.LAST_FM_API_KEY = "test";
 
 	const response = await server.inject({
-		method: "GET",
+		method: "POST",
 		url: "/artists/search/Cher/csv/write-file",
 		query: {
 			csvFileName: "write-file-test",

@@ -8,7 +8,7 @@ import { Artist } from "../../../../../../utils/searchArtists/types";
 
 export default async function (server: ServerInstance)
 {
-	server.get("/", {
+	server.post("/", {
 		schema: {
 			params: Type.Object({
 				artistName: Type.String({ minLength: 1 }),
