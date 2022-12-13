@@ -1,7 +1,5 @@
 import ava, { TestFn } from "ava";
 import nock from "nock";
-import fs from "fs";
-import path from "path";
 
 import { buildServer, ServerInstance } from "../../../../../../server";
 import { LAST_FM_API_URL } from "../../../../../../utils/searchArtists";
@@ -26,13 +24,13 @@ test.afterEach((t) =>
 	t.context.server.close();
 });
 
-test("GET /artist/search/:artistName/csv/write-file should return error because of missing artistName", async (t) =>
+test("GET /artists/search/:artistName/csv/get-as-file should return error because of missing artistName", async (t) =>
 {
 	const { server } = t.context;
 
 	const response = await server.inject({
 		method: "GET",
-		url: "/artist/search//csv/write-file",
+		url: "/artists/search//csv/get-as-file",
 	});
 
 	t.is(response.statusCode, 400);
@@ -40,22 +38,13 @@ test("GET /artist/search/:artistName/csv/write-file should return error because 
 	t.is(response.json().message, "params/artistName must NOT have fewer than 1 characters");
 });
 
-test("GET /artist/search/:artistName/csv/write-file should return error because of missing csvFileName", async (t) =>
+test("GET /artists/search/:artistName/csv/get-as-file should return error because of invalid csvFileName", async (t) =>
 {
 	const { server } = t.context;
 
-	let response = await server.inject({
+	const response = await server.inject({
 		method: "GET",
-		url: "/artist/search/test/csv/write-file",
-	});
-
-	t.is(response.statusCode, 400);
-	t.is(response.json().error, "Bad Request");
-	t.is(response.json().message, "querystring must have required property 'csvFileName'");
-
-	response = await server.inject({
-		method: "GET",
-		url: "/artist/search/test/csv/write-file",
+		url: "/artists/search/test/csv/get-as-file",
 		query: {
 			csvFileName: "",
 		}
@@ -66,13 +55,13 @@ test("GET /artist/search/:artistName/csv/write-file should return error because 
 	t.is(response.json().message, "querystring/csvFileName must NOT have fewer than 1 characters");
 });
 
-test("GET /artist/search/:artistName/csv/write-file should return error because of invalid randomFallbackAmount", async (t) =>
+test("GET /artists/search/:artistName/csv/get-as-file should return error because of invalid randomFallbackAmount", async (t) =>
 {
 	const { server } = t.context;
 
 	let response = await server.inject({
 		method: "GET",
-		url: "/artist/search/test/csv/write-file",
+		url: "/artists/search/test/csv/get-as-file",
 		query: {
 			csvFileName: "test",
 			randomFallbackAmount: "test",
@@ -85,7 +74,7 @@ test("GET /artist/search/:artistName/csv/write-file should return error because 
 
 	response = await server.inject({
 		method: "GET",
-		url: "/artist/search/test/csv/write-file",
+		url: "/artists/search/test/csv/get-as-file",
 		query: {
 			csvFileName: "test",
 			randomFallbackAmount: "-1",
@@ -98,7 +87,7 @@ test("GET /artist/search/:artistName/csv/write-file should return error because 
 
 	response = await server.inject({
 		method: "GET",
-		url: "/artist/search/test/csv/write-file",
+		url: "/artists/search/test/csv/get-as-file",
 		query: {
 			csvFileName: "test",
 			randomFallbackAmount: "4",
@@ -110,13 +99,13 @@ test("GET /artist/search/:artistName/csv/write-file should return error because 
 	t.is(response.json().message, "querystring/randomFallbackAmount must be <= 3");
 });
 
-test("GET /artist/search/:artistName/csv/write-file should return generic error", async (t) =>
+test("GET /artists/search/:artistName/csv/get-as-file should return generic error", async (t) =>
 {
 	const { server } = t.context;
 
 	const response = await server.inject({
 		method: "GET",
-		url: "/artist/search/test/csv/write-file",
+		url: "/artists/search/test/csv/get-as-file",
 		query: {
 			csvFileName: "test",
 		},
@@ -127,33 +116,48 @@ test("GET /artist/search/:artistName/csv/write-file should return generic error"
 	t.is(response.json().message, "Error while searching for artists");
 });
 
-test.serial("GET /artist/search/:artistName/csv/write-file should write file", async (t) =>
+test.serial("GET /artists/search/:artistName/csv/get-as-file should return csv", async (t) =>
 {
 	const { server } = t.context;
 
-	const mock = nock(LAST_FM_API_URL)
+	let mock = nock(LAST_FM_API_URL)
 		.get(() => true)
 		.reply(200, LAST_FM_API_DEMO_RESPONSE);
 
 	process.env.LAST_FM_API_KEY = "test";
 
-	const response = await server.inject({
+	/* Test with csvFileName */
+	let response = await server.inject({
 		method: "GET",
-		url: "/artist/search/Cher/csv/write-file",
+		url: "/artists/search/Cher/csv/get-as-file",
 		query: {
-			csvFileName: "write-file-test",
+			csvFileName: "get-as-file-test",
 		},
 	});
 
 	t.true(mock.isDone());
 
 	t.is(response.statusCode, 200);
-	t.is(response.json().message, "File successfully written");
+	t.is(response.body, convertArtistsToCsv(LAST_FM_API_DEMO_RESPONSE.results.artistmatches.artist.map(mapLastFmArtist)));
+	t.is(response.headers["content-type"], "text/csv");
+	t.is(response.headers["content-disposition"], "attachment; filename=get-as-file-test.csv");
 
-	const file = server.csvFileSystem.readFile("write-file-test");
+	/* Without csvFileName should use artist name as filename */
+	mock = nock(LAST_FM_API_URL)
+		.get(() => true)
+		.reply(200, LAST_FM_API_DEMO_RESPONSE);
 
-	t.is(file, convertArtistsToCsv(LAST_FM_API_DEMO_RESPONSE.results.artistmatches.artist.map(mapLastFmArtist)));
+	response = await server.inject({
+		method: "GET",
+		url: "/artists/search/Wiz Khalifa/csv/get-as-file",
+	});
 
-	fs.unlinkSync(path.resolve("./csv-files/write-file-test.csv"));
+	t.true(mock.isDone());
+
+	t.is(response.statusCode, 200);
+	t.is(response.body, convertArtistsToCsv(LAST_FM_API_DEMO_RESPONSE.results.artistmatches.artist.map(mapLastFmArtist)));
+	t.is(response.headers["content-type"], "text/csv");
+	t.is(response.headers["content-disposition"], "attachment; filename=wiz-khalifa.csv");
+
 	nock.cleanAll();
 });

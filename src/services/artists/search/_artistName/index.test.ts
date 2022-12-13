@@ -22,13 +22,13 @@ test.afterEach((t) =>
 	t.context.server.close();
 });
 
-test("GET /artist/search/:artistName should return error because of missing artistName", async (t) =>
+test("GET /artists/search/:artistName should return error because of missing artistName", async (t) =>
 {
 	const { server } = t.context;
 
 	const response = await server.inject({
 		method: "GET",
-		url: "/artist/search/",
+		url: "/artists/search/",
 	});
 
 	t.is(response.statusCode, 400);
@@ -36,13 +36,13 @@ test("GET /artist/search/:artistName should return error because of missing arti
 	t.is(response.json().message, "params/artistName must NOT have fewer than 1 characters");
 });
 
-test("GET /artist/search/:artistName should return error because of invalid randomFallbackAmount", async (t) =>
+test("GET /artists/search/:artistName should return error because of invalid randomFallbackAmount", async (t) =>
 {
 	const { server } = t.context;
 
 	let response = await server.inject({
 		method: "GET",
-		url: "/artist/search/test",
+		url: "/artists/search/test",
 		query: {
 			randomFallbackAmount: "test",
 		},
@@ -54,7 +54,7 @@ test("GET /artist/search/:artistName should return error because of invalid rand
 
 	response = await server.inject({
 		method: "GET",
-		url: "/artist/search/test",
+		url: "/artists/search/test",
 		query: {
 			randomFallbackAmount: "-1",
 		},
@@ -66,7 +66,7 @@ test("GET /artist/search/:artistName should return error because of invalid rand
 
 	response = await server.inject({
 		method: "GET",
-		url: "/artist/search/test",
+		url: "/artists/search/test",
 		query: {
 			randomFallbackAmount: "4",
 		},
@@ -77,13 +77,13 @@ test("GET /artist/search/:artistName should return error because of invalid rand
 	t.is(response.json().message, "querystring/randomFallbackAmount must be <= 3");
 });
 
-test("GET /artist/search/:artistName should return generic error", async (t) =>
+test("GET /artists/search/:artistName should return generic error", async (t) =>
 {
 	const { server } = t.context;
 
 	const response = await server.inject({
 		method: "GET",
-		url: "/artist/search/test",
+		url: "/artists/search/test",
 	});
 
 	t.is(response.statusCode, 500);
@@ -91,7 +91,7 @@ test("GET /artist/search/:artistName should return generic error", async (t) =>
 	t.is(response.json().message, "Error while searching for artists");
 });
 
-test.serial("GET /artist/search/:artistName should return artists", async (t) =>
+test.serial("GET /artists/search/:artistName should return artists", async (t) =>
 {
 	const { server } = t.context;
 
@@ -103,7 +103,7 @@ test.serial("GET /artist/search/:artistName should return artists", async (t) =>
 
 	const response = await server.inject({
 		method: "GET",
-		url: "/artist/search/Cher",
+		url: "/artists/search/Cher",
 	});
 
 	t.true(mock.isDone());
