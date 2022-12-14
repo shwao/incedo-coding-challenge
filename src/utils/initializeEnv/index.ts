@@ -1,6 +1,14 @@
 import { config as dotenv } from "dotenv";
 import * as fs from "fs";
 
+/**
+ * Initializes environment variables from a .env file.
+ * @param requiredEnvVars - List of required environment variables.
+ * @throws {Error} - If NODE_ENV is not set.
+ * @throws {Error} - If NODE_ENV is not one of: production, development
+ * @throws {Error} - If the environment file does not exist.
+ * @throws {Error} - If a required environment variable is not set.
+ */
 export function initializeEnv({ requiredEnvVars }: {
 	requiredEnvVars?: string[];
 } = {})

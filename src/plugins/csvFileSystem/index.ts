@@ -6,6 +6,14 @@ export interface CsvFileSystemPluginOptions
 	path: string;
 }
 
+/**
+ * Plugin that adds methods to the server to store and read CSV files. Creates 
+ * the directory if it does not exist.
+ * @param server - Fastify server instance.
+ * @param options - Plugin options.
+ * @param options.path - Path to the directory where the CSV files will be stored.
+ * @throws {Error} - If the path is not set.
+ */
 export const csvFileSystemPlugin = fastifyPlugin<CsvFileSystemPluginOptions>(async (server, options) =>
 {
 	const { path } = options;

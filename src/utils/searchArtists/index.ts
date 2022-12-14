@@ -5,6 +5,18 @@ import { Artist } from "./types";
 
 export const LAST_FM_API_URL = "https://ws.audioscrobbler.com/2.0/";
 
+/**
+ * Searches for artists on Last.fm.
+ * @param artistName - Name of the artist to search for.
+ * @param lastFmApiKey - Last.fm API key.
+ * @returns Array of artists.
+ * @throws {Error} - If no artist name is provided.
+ * @throws {Error} - If no Last.fm API key is provided.
+ * @throws {Error} - If an error occurs while getting data from Last.fm.
+ * @throws {Error} - If an error occurs while parsing data from Last.fm.
+ * @throws {Error} - If an invalid response is received from Last.fm.
+ * @throws {Error} - If an invalid API key is provided.
+ */
 export async function searchArtists({ artistName, lastFmApiKey }: {
 	artistName: string;
 	lastFmApiKey: string;

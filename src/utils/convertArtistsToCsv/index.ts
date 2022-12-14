@@ -1,5 +1,10 @@
 import { Artist } from "../searchArtists/types";
 
+/**
+ * Converts an array of artists to a CSV string with a header row.
+ * @param artists - Array of artists.
+ * @returns CSV string.
+ */
 export function convertArtistsToCsv(artists: Artist[])
 {
 	return [

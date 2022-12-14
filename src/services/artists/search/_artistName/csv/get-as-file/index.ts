@@ -80,6 +80,10 @@ export default async function (server: ServerInstance)
 			});
 		}
 
+		/* 
+			Use the artist name as file name if no file name was provided. Replaces
+			all character except numbers and letters with hyphens.
+		*/
 		const fileName = csvFileName || artistName.toLowerCase().replace(/[^a-z0-9]/g, "-");
 
 		return reply

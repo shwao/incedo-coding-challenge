@@ -16,9 +16,11 @@ export function buildServer({
 {
 	const server = fastify(serverOptions).withTypeProvider<TypeBoxTypeProvider>();
 
+	/* Plugins that add security header to the requests */
 	server.register(fastifyCors);
 	server.register(fastifyHelmet);
 
+	/* Plugins that automatically loads the services in the services directory */
 	server.register(fastifyAutoLoad, {
 		dir: servicesPath,
 		autoHooks: true,
@@ -27,6 +29,7 @@ export function buildServer({
 		overwriteHooks: true,
 	});
 
+	/* Plugin that adds methods to the server to store and read CSV files. */
 	server.register(csvFileSystemPlugin, {
 		path: path.resolve("./csv-files"),
 	});
